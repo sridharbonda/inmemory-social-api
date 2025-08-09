@@ -41,5 +41,6 @@ public class Post {
      * Set of usernames who have liked this post.
      * Defaults to an empty set to avoid NullPointerException.
      */
+    @Builder.Default
     private Set<String> likedBy = new HashSet<>();
 }

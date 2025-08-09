@@ -1,7 +1,7 @@
 package com.sridhar.socialapi.controller;
 
-import com.sridhar.socialapi.Exception.TokenValidationFailed;
-import com.sridhar.socialapi.Exception.UserNameAlreadyRegistered;
+import com.sridhar.socialapi.exception.TokenValidationFailedException;
+import com.sridhar.socialapi.exception.UserNameAlreadyRegisteredException;
 import com.sridhar.socialapi.dto.User;
 import com.sridhar.socialapi.store.UserStore;
 import com.sridhar.socialapi.utils.JwtUtils;
@@ -45,7 +45,7 @@ public class AuthController {
     public ResponseEntity<?> signup(@RequestBody User signupRequest) {
         log.info("Received the new user sign up request.");
         if (UserStore.exists(signupRequest.getUsername())) {
-            throw new UserNameAlreadyRegistered(signupRequest.getUsername());
+            throw new UserNameAlreadyRegisteredException(signupRequest.getUsername());
         }
 
         User newUser = User.builder()
@@ -77,7 +77,7 @@ public class AuthController {
         Boolean validation = jwtUtil.validateJwtToken(token);
         log.info("The validation result for the token generated is: {}", validation);
         if (!validation){
-            throw new TokenValidationFailed("The validation of the token has failed.");
+            throw new TokenValidationFailedException("The validation of the token has failed.");
         }
         log.info("Login Successful for user: {}",loginRequest.getUsername());
         return ResponseEntity.ok(token);

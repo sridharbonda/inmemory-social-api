@@ -45,6 +45,7 @@ public interface PostService {
 
     /**
      * Adds a like to the specified post from the given user.
+     * Supports Toggle behaviour
      *
      * @param id the ID of the post to like
      * @param username the username of the user liking the post

@@ -24,5 +24,9 @@ public class ErrorResponse {
 
     @Schema(description = "Detailed error message", example = "You do not have permission to access this resource")
     private String message;
+
+    @Schema(description = "request uri")
+    private String request;
+
 }
 

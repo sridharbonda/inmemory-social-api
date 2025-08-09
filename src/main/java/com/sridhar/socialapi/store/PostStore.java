@@ -2,19 +2,20 @@ package com.sridhar.socialapi.store;
 
 
 import com.sridhar.socialapi.dto.Post;
+import com.sridhar.socialapi.exception.PostNotFoundException;
+import com.sridhar.socialapi.exception.PostNotOwnedException;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * In-memory storage for posts in the Social API Server application.
  * This class simulates a database by storing posts in a ConcurrentHashMap.
- * <p>
  * Thread-safe operations are provided for creating, retrieving, deleting, and liking posts.
  */
+@Slf4j
 public class PostStore {
 
     /**
@@ -34,13 +35,11 @@ public class PostStore {
      * Saves a new post to the in-memory store.
      *
      * @param post The post object to save
-     * @return The saved post with an auto-generated ID
      */
-    public static Post savePost(Post post) {
+    public static void savePost(Post post) {
         long id = postIdGenerator.getAndIncrement();
         post.setId(id);
         posts.put(id, post);
-        return post;
     }
 
     /**
@@ -67,19 +66,23 @@ public class PostStore {
      *
      * @param id       The ID of the post
      * @param username The username of the post's author
-     * @return true if the post was deleted, false otherwise
      */
-    public static boolean deletePost(Long id, String username) {
+    public static void deletePost(Long id, String username) {
         Post post = posts.get(id);
-        if (post != null && post.getAuthor().equals(username)) {
-            posts.remove(id);
-            return true;
+        if (post == null) {
+            throw new PostNotFoundException("Post not found for id: "+id);
         }
-        return false;
+        if (!post.getAuthor().equals(username)) {
+            throw new PostNotOwnedException("User doesn't own the post with id: "+id);
+        }
+        posts.remove(id);
+        log.info("The post with id: {} has been deleted", id);
     }
 
     /**
      * Adds a like to a post by the given username.
+     * Supports Toggle Behaviour
+     * Post can be unliked with invoked same request again
      * Does nothing if the post does not exist.
      *
      * @param id       The ID of the post
@@ -87,15 +90,27 @@ public class PostStore {
      */
     public static void likePost(Long id, String username) {
         Post post = posts.get(id);
-        if (post != null) {
-            post.getLikedBy().add(username);
+        if (post == null) {
+            throw new PostNotFoundException("Post not found for id: "+id);
         }
+        Set<String> likedBy = post.getLikedBy();
+
+        if (likedBy.contains(username)) {
+            // Toggle: Remove like if already liked
+            likedBy.remove(username);
+            log.info("User {} unliked post {}", username, id);
+        } else {
+            // Add like if not already liked
+            likedBy.add(username);
+            log.info("User {} liked post {}", username, id);
+        }
+        log.info("the post updated: {}", post);
     }
 
     /**
      * Retrieves all posts created by a specific user.
      *
-     * @param username The username of the author
+     * @param username, The username of the author
      * @return List of posts authored by the given user
      */
     public static List<Post> getMyPost(String name) {

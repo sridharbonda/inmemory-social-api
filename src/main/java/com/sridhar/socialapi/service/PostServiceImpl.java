@@ -41,7 +41,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public void likePost(Long id, String username) {
-        PostStore.deletePost(id, username);
+        PostStore.likePost(id, username);
         log.info("Liked the post id : {} successfully", id);
     }
 }
