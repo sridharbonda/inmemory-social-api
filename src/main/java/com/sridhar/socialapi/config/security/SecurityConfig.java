@@ -1,7 +1,8 @@
-package com.sridhar.socialapi.security;
+package com.sridhar.socialapi.config.security;
 
 import com.sridhar.socialapi.utils.AuthTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,8 +23,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthTokenFilter jwtFilter;
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    AuthTokenFilter jwtFilter;
+    @Autowired
+    UserDetailsService userDetailsService;
+    @Autowired
+    CustomAuthEntryPoint customAuthEntryPoint;
+    @Autowired
+    CustomAccessDeniedHandler customAccessDeniedHandler;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -31,12 +39,20 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
+                .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(customAuthEntryPoint) // 401 handler
+                .accessDeniedHandler(customAccessDeniedHandler)) // 403 handler
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

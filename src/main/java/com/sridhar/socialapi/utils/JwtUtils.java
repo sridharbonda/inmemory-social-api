@@ -14,6 +14,11 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+
+/** Utils class handles JWT token related utilties
+ *  it include getting jwt token from header, extracting username for token
+ *  Generation of token, Validation of token
+ * */
 @Slf4j
 @Component
 public class JwtUtils {
@@ -39,18 +44,13 @@ public class JwtUtils {
     }
 
     public String generateToken(UserDetails userDetails) {
-        try {
-            String username = userDetails.getUsername();
-            return Jwts.builder()
-                    .subject(username)
-                    .issuedAt(new Date())
-                    .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                    .signWith(getKey(), SignatureAlgorithm.HS256)
-                    .compact();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        String username = userDetails.getUsername();
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String extractUsername(String token) {
@@ -58,11 +58,6 @@ public class JwtUtils {
                 .verifyWith(getKey())
                 .build().parseSignedClaims(token)
                 .getPayload().getSubject();
-    }
-
-    public boolean validateToken(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername()) &&
-                validateJwtToken(token);
     }
 
     public boolean validateJwtToken(String authToken) {
@@ -80,13 +75,5 @@ public class JwtUtils {
             log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
-    }
-
-    public static String getCurrentUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return authentication.getName();
-        }
-        return null;
     }
 }

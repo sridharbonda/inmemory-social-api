@@ -4,6 +4,7 @@ import com.sridhar.socialapi.Exception.TokenValidationFailed;
 import com.sridhar.socialapi.Exception.UserNameAlreadyRegistered;
 import com.sridhar.socialapi.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,18 +17,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class GlobalControllerAdvice{
+public class GlobalControllerAdvice {
 
     @ExceptionHandler(UserNameAlreadyRegistered.class)
     public ResponseEntity<ErrorResponse> handleBookNotFound(UserNameAlreadyRegistered ex) {
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), "This username "+ex.getMessage()+" is already registered ", HttpStatus.CONFLICT);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                "This username " + ex.getMessage() + " is already registered"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(TokenValidationFailed.class)
     public ResponseEntity<ErrorResponse> handleBookNotFound(TokenValidationFailed ex) {
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), ex.getMessage(), HttpStatus.EXPECTATION_FAILED);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.EXPECTATION_FAILED.value(),
+                HttpStatus.EXPECTATION_FAILED.getReasonPhrase(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,8 +61,13 @@ public class GlobalControllerAdvice{
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAllOtherExceptions(Exception ex){
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), ex.getMessage() + "Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleAllOtherExceptions(Exception ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 }
