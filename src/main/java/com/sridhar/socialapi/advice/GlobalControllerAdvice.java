@@ -1,9 +1,6 @@
 package com.sridhar.socialapi.advice;
 
-import com.sridhar.socialapi.exception.PostNotFoundException;
-import com.sridhar.socialapi.exception.PostNotOwnedException;
-import com.sridhar.socialapi.exception.TokenValidationFailedException;
-import com.sridhar.socialapi.exception.UserNameAlreadyRegisteredException;
+import com.sridhar.socialapi.exception.*;
 import com.sridhar.socialapi.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +28,19 @@ public class GlobalControllerAdvice {
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 "This username " + ex.getMessage() + " is already registered",
+                request.getRequestURI()
+        );
+        printError(ex, request);
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                ex.getMessage(),
                 request.getRequestURI()
         );
         printError(ex, request);

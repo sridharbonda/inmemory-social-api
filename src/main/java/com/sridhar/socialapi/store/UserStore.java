@@ -2,6 +2,7 @@ package com.sridhar.socialapi.store;
 
 
 import com.sridhar.socialapi.dto.User;
+import com.sridhar.socialapi.exception.UserNotFoundException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +37,11 @@ public class UserStore {
      * @return The User object if found, otherwise null
      */
     public static User findByUsername(String username) {
-        return users.get(username);
+        User user = users.get(username);
+        if (user == null){
+            throw new UserNotFoundException("User with username : "+username+" is not registered yet.");
+        }
+        return user;
     }
 
 

@@ -45,6 +45,7 @@ src/main/java/com/sridhar/socialapi/
 
 2. **Build and run**
    ```bash
+   mvn clean install
    mvn spring-boot:run
    ```
 

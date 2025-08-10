@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.sridhar.socialapi</groupId>
     <artifactId>social-api-server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>social-api-server</name>
     <description>A Basic Social media app project</description>
     <url/>
@@ -90,6 +90,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.5.4</version>
                 <configuration>
                     <excludes>
                         <exclude>
