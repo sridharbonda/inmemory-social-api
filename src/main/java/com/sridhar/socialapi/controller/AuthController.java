@@ -1,9 +1,10 @@
 package com.sridhar.socialapi.controller;
 
+import com.sridhar.socialapi.dto.UserRequest;
 import com.sridhar.socialapi.exception.TokenValidationFailedException;
 import com.sridhar.socialapi.exception.UserNameAlreadyRegisteredException;
-import com.sridhar.socialapi.dto.User;
-import com.sridhar.socialapi.store.UserStore;
+import com.sridhar.socialapi.entity.User;
+import com.sridhar.socialapi.service.CustomUserDetailsService;
 import com.sridhar.socialapi.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,14 +38,15 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final PasswordEncoder passwordEncoder;
 
 
     @PostMapping("/signup")
     @Operation(summary = "New User Signup", description = "Registering the new user.")
-    public ResponseEntity<?> signup(@RequestBody User signupRequest) {
+    public ResponseEntity<?> signup(@RequestBody UserRequest signupRequest) {
         log.info("Received the new user sign up request.");
-        if (UserStore.exists(signupRequest.getUsername())) {
+        if (customUserDetailsService.isExist(signupRequest.getUsername())) {
             throw new UserNameAlreadyRegisteredException(signupRequest.getUsername());
         }
 
@@ -53,7 +55,7 @@ public class AuthController {
                 .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .build();
 
-        UserStore.saveUser(newUser);
+        customUserDetailsService.saveUser(newUser);
 
         log.info("New User created successfully with username: {}", newUser.getUsername());
 
@@ -62,7 +64,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "User Login", description = "Generates the JWT token after successful user login")
-    public ResponseEntity<String> login(@RequestBody User loginRequest) {
+    public ResponseEntity<String> login(@RequestBody UserRequest loginRequest) {
         log.info("Received Login Request.");
         String token = null;
         Authentication authentication = authenticationManager.authenticate(

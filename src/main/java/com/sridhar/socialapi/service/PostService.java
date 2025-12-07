@@ -1,6 +1,7 @@
 package com.sridhar.socialapi.service;
 
-import com.sridhar.socialapi.dto.Post;
+import com.sridhar.socialapi.dto.PostDetails;
+import com.sridhar.socialapi.entity.Post;
 import com.sridhar.socialapi.dto.PostRequest;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public interface PostService {
      * @param username the username of the user whose posts are to be retrieved
      * @return a list of Post objects created by the specified user
      */
-    List<Post> getUserPosts(String username);
+    List<PostDetails> getUserPosts(String username);
 
     /**
      * Creates a new post for the given user.
@@ -33,7 +34,7 @@ public interface PostService {
      *
      * @return a list of all Post objects
      */
-    List<Post> listAllPosts();
+    List<PostDetails> listAllPosts();
 
     /**
      * Deletes a post if it belongs to the specified user.
@@ -42,6 +43,8 @@ public interface PostService {
      * @param username the username of the post's owner
      */
     void deletePost(Long id, String username);
+
+    void deleteAllMyPost(String username);
 
     /**
      * Adds a like to the specified post from the given user.

@@ -1,20 +1,21 @@
 package com.sridhar.socialapi.controller;
 
-import com.sridhar.socialapi.dto.Post;
+import com.sridhar.socialapi.dto.PostDetails;
+import com.sridhar.socialapi.entity.Post;
 import com.sridhar.socialapi.dto.PostRequest;
 import com.sridhar.socialapi.service.PostService;
-import com.sridhar.socialapi.store.PostStore;
 import com.sridhar.socialapi.utils.EntityMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST Controller for managing social media posts.
@@ -39,18 +40,18 @@ public class PostController {
 
     @GetMapping("/allPosts")
     @Operation(summary = "List all posts", description = "Returns a list of all posts with author details.")
-    public ResponseEntity<List<Post>> getAllPosts(){
+    public ResponseEntity<List<PostDetails>> getAllPosts(){
         log.info("Request received for returning all posts stored.");
-        List<Post> postResponseList = postService.listAllPosts();
-        return ResponseEntity.ok(postResponseList);
+        List<PostDetails> postDetailsList = postService.listAllPosts();
+        return ResponseEntity.ok(postDetailsList);
     }
 
     @GetMapping("/myPosts")
     @Operation(summary = "List the user posts", description = "Returns a list of all posts the user.")
-    public ResponseEntity<List<Post>> getMyPosts(Principal principal) throws Exception {
+    public ResponseEntity<List<PostDetails>> getMyPosts(Principal principal) throws Exception {
         log.info("Request received to return the user's posts");
-        List<Post> postResponseList = postService.getUserPosts(principal.getName());
-        return ResponseEntity.ok(postResponseList);
+        List<PostDetails> postDetailsList = postService.getUserPosts(principal.getName());
+        return ResponseEntity.ok(postDetailsList);
     }
 
     @PutMapping("/like/post/{id}")
@@ -66,6 +67,14 @@ public class PostController {
     public ResponseEntity<?> deleteMyPost(@PathVariable Long id, Principal principal) throws Exception {
         log.info("received request to delete the post id : {}", id);
         postService.deletePost(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/posts")
+    @Operation(summary = "Delete all user post", description = "Deletes all post by user if it belongs to the authenticated user.")
+    public ResponseEntity<?> deleteAllMyPosts(Principal principal) throws Exception {
+//        log.info("received request to delete the post id : {}", id);
+        postService.deleteAllMyPost(principal.getName());
         return ResponseEntity.noContent().build();
     }
 }

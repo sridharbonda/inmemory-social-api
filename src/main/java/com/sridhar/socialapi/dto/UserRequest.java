@@ -1,21 +1,16 @@
 package com.sridhar.socialapi.dto;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-/**
- * Data Transfer Object (DTO) representing a user in the social API.
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class User {
-    /**
-     * The unique username for the user.
-     */
+public class UserRequest {
     private String username;
 
     /**

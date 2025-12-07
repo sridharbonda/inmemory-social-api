@@ -1,7 +1,8 @@
 package com.sridhar.socialapi.service;
 
-import com.sridhar.socialapi.dto.User;
-import com.sridhar.socialapi.store.UserStore;
+import com.sridhar.socialapi.entity.User;
+import com.sridhar.socialapi.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,19 +16,29 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
     /**
      * Loads a user's details by their username for Spring Security authentication.
      */
+    private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = UserStore.findByUsername(username);
+        User user = userRepository.findByUsername(username);
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .build();
+    }
+
+    public Boolean isExist(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 }
 
