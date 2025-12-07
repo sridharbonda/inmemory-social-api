@@ -54,4 +54,6 @@ public interface PostService {
      * @param username the username of the user liking the post
      */
     void likePost(Long id, String username);
+
+    PostDetails getPost(Long id);
 }

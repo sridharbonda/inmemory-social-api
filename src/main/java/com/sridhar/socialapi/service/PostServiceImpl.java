@@ -87,4 +87,13 @@ public class PostServiceImpl implements PostService{
 
         log.info("Liked the post id : {} successfully", id);
     }
+
+    @Override
+    public PostDetails getPost(Long id) {
+
+        Post post = postRepository.findById(id).get();
+        PostDetails postDetails = EntityMapper.mapToResponse(post);
+        log.info("Post retrieved: {}", postDetails);
+        return postDetails;
+    }
 }
