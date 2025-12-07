@@ -5,6 +5,7 @@ import com.sridhar.socialapi.entity.Post;
 import com.sridhar.socialapi.dto.PostRequest;
 import com.sridhar.socialapi.entity.PostLikes;
 import com.sridhar.socialapi.entity.User;
+import com.sridhar.socialapi.model.EventModel;
 import com.sridhar.socialapi.repository.PostLikesRepository;
 import com.sridhar.socialapi.repository.PostRepository;
 import com.sridhar.socialapi.repository.UserRepository;
@@ -12,6 +13,7 @@ import com.sridhar.socialapi.utils.EntityMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostLikesRepository postLikesRepository;
+    private final KafkaTemplate<String, EventModel> kafkaTemplate;
 
     @Override
     public void createPost(PostRequest postRequest, String username) {
@@ -84,6 +87,15 @@ public class PostServiceImpl implements PostService{
         postLikes.setPost(post);
 
         postLikesRepository.save(postLikes);
+
+        EventModel eventModel = EventModel.builder()
+                .author(post.getAuthor().getUsername())
+                .likedBy(username)
+                .postId(id).build();
+
+        log.info("EventModel is : {}", eventModel);
+
+        kafkaTemplate.send("post-like", eventModel);
 
         log.info("Liked the post id : {} successfully", id);
     }
